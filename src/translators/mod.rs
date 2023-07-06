@@ -5,6 +5,9 @@ use async_trait::async_trait;
 use std::{collections::HashMap, fmt};
 use strum_macros::EnumString;
 
+/// Language list with code.
+///
+/// This is defined in ISO-639-1: https://localizely.com/iso-639-1-list/.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, EnumString)]
 pub enum Language {
     #[strum(serialize = "aa")]
