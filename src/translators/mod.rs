@@ -1,4 +1,5 @@
 mod clear;
+mod clone;
 mod openai;
 
 use anyhow::Result;
@@ -387,9 +388,10 @@ impl fmt::Display for Language {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, EnumString)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, EnumString)]
 pub enum TranslatorEngine {
     Clear,
+    Clone,
     OpenAI,
 }
 
@@ -412,8 +414,9 @@ pub trait Translator: Send + Sync {
 
 pub fn create(config: TranslatorConfig) -> Box<dyn Translator> {
     match config.engine {
-        TranslatorEngine::OpenAI => Box::new(openai::OpenAITranslator::new(config)),
         TranslatorEngine::Clear => Box::new(clear::ClearTranslator::new(config)),
+        TranslatorEngine::Clone => Box::new(clone::CloneTranslator::new(config)),
+        TranslatorEngine::OpenAI => Box::new(openai::OpenAITranslator::new(config)),
     }
 }
 
@@ -448,8 +451,8 @@ mod tests {
     }
 
     #[test]
-    fn openai_translator_can_be_created() {
-        let config = TranslatorConfig {
+    fn translators_can_be_created() {
+        let mut config = TranslatorConfig {
             engine: TranslatorEngine::OpenAI,
             target_lang: Language::English,
             model: None,
@@ -458,22 +461,15 @@ mod tests {
             extra_params: HashMap::new(),
         };
 
-        let translator = create(config);
-        assert_eq!(translator.name(), TranslatorEngine::OpenAI);
-    }
-
-    #[test]
-    fn clear_translator_can_be_created() {
-        let config = TranslatorConfig {
-            engine: TranslatorEngine::Clear,
-            target_lang: Language::English,
-            model: None,
-            api_url: None,
-            api_key: String::from(""),
-            extra_params: HashMap::new(),
-        };
-
-        let translator = create(config);
-        assert_eq!(translator.name(), TranslatorEngine::Clear);
+        let engines = vec![
+            TranslatorEngine::Clear,
+            TranslatorEngine::Clone,
+            TranslatorEngine::OpenAI,
+        ];
+        for engine in engines {
+            config.engine = engine;
+            let translator = create(config.clone());
+            assert_eq!(translator.name(), engine);
+        }
     }
 }
