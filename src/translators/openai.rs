@@ -1,4 +1,4 @@
-use super::{Language, Translator, TranslatorConfig};
+use super::{Language, Translator, TranslatorConfig, TranslatorEngine};
 use anyhow::Result;
 use async_trait::async_trait;
 use openai_api_rs::v1::api::Client;
@@ -31,8 +31,8 @@ impl OpenAITranslator {
 
 #[async_trait]
 impl Translator for OpenAITranslator {
-    fn name(&self) -> &'static str {
-        "openai"
+    fn name(&self) -> TranslatorEngine {
+        TranslatorEngine::OpenAI
     }
 
     async fn translate(&self, text: &str) -> Result<String> {
@@ -75,9 +75,9 @@ mod tests {
     use std::collections::HashMap;
 
     #[tokio::test]
-    async fn test_openai() {
+    async fn test_openai_translator() {
         let config = TranslatorConfig {
-            engine: String::from("openai"),
+            engine: TranslatorEngine::OpenAI,
             target_lang: Language::English,
             model: None,
             api_url: None,

@@ -12,8 +12,8 @@ pub struct Opts {
     #[clap(short, long, default_value = "en")]
     pub target_lang: Language,
 
-    #[clap(short, long, env = "POTR_ENGINE", default_value = "openai")]
-    pub engine: String,
+    #[clap(short, long, env = "POTR_ENGINE", default_value = "OpenAI")]
+    pub engine: TranslatorEngine,
 
     #[clap(short, long, env = "POTR_API_KEY", default_value = "")]
     pub api_key: String,
@@ -25,8 +25,16 @@ pub struct Opts {
     pub output_file_path: Option<String>,
 
     /// Skip translation, only generate po file.
-    #[clap(long)]
+    #[clap(long, visible_alias = "st")]
     pub skip_translation: bool,
+
+    /// Translate translated message. By default, translated messages are skipped.
+    #[clap(long, visible_alias = "tt")]
+    pub translate_translated: bool,
+
+    /// Translate code blocks. By default, code blocks are skipped.
+    #[clap(long, visible_alias = "tc")]
+    pub translate_code_blocks: bool,
 }
 
 impl Opts {
@@ -51,6 +59,8 @@ impl Opts {
             po_file_path: self.po_file_path.clone(),
             output_file_path: output_file_path,
             skip_translation: self.skip_translation,
+            translate_translated: self.translate_translated,
+            translate_code_blocks: self.translate_code_blocks,
         }
     }
 }

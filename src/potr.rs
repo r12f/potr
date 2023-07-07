@@ -10,6 +10,8 @@ pub struct PotrConfig {
     pub po_file_path: String,
     pub output_file_path: String,
     pub skip_translation: bool,
+    pub translate_translated: bool,
+    pub translate_code_blocks: bool,
 }
 
 pub struct Potr {
@@ -83,10 +85,16 @@ impl Potr {
 
     async fn translate_message<'a>(
         &self,
-        translator: &impl Translator,
+        translator: &Box<dyn Translator>,
         message: &mut MessageMutProxy<'a>,
     ) -> Result<bool> {
-        if message.is_translated() {
+        if !self.config.translate_translated && message.is_translated() {
+            tracing::debug!("Skip translated message: {}", message.msgid());
+            return Ok(false);
+        }
+
+        if !self.config.translate_code_blocks && message.msgid().starts_with("```") {
+            tracing::debug!("Skip code block message: {}", message.msgid());
             return Ok(false);
         }
 

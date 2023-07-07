@@ -1,3 +1,4 @@
+mod clear;
 mod openai;
 
 use anyhow::Result;
@@ -386,9 +387,15 @@ impl fmt::Display for Language {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, PartialOrd, EnumString)]
+pub enum TranslatorEngine {
+    Clear,
+    OpenAI,
+}
+
 #[derive(Debug, Clone)]
 pub struct TranslatorConfig {
-    pub engine: String,
+    pub engine: TranslatorEngine,
     pub target_lang: Language,
     pub api_key: String,
     pub model: Option<String>,
@@ -398,15 +405,15 @@ pub struct TranslatorConfig {
 
 #[async_trait]
 pub trait Translator: Send + Sync {
-    fn name(&self) -> &'static str;
+    fn name(&self) -> TranslatorEngine;
 
     async fn translate(&self, text: &str) -> Result<String>;
 }
 
-pub fn create(config: TranslatorConfig) -> impl Translator {
-    match config.engine.as_str() {
-        "openai" => openai::OpenAITranslator::new(config),
-        _ => panic!("Unknown engine: {}", config.engine),
+pub fn create(config: TranslatorConfig) -> Box<dyn Translator> {
+    match config.engine {
+        TranslatorEngine::OpenAI => Box::new(openai::OpenAITranslator::new(config)),
+        TranslatorEngine::Clear => Box::new(clear::ClearTranslator::new(config)),
     }
 }
 
@@ -441,9 +448,9 @@ mod tests {
     }
 
     #[test]
-    fn translator_can_be_created() {
+    fn openai_translator_can_be_created() {
         let config = TranslatorConfig {
-            engine: String::from("openai"),
+            engine: TranslatorEngine::OpenAI,
             target_lang: Language::English,
             model: None,
             api_url: None,
@@ -452,6 +459,21 @@ mod tests {
         };
 
         let translator = create(config);
-        assert_eq!(translator.name(), "openai");
+        assert_eq!(translator.name(), TranslatorEngine::OpenAI);
+    }
+
+    #[test]
+    fn clear_translator_can_be_created() {
+        let config = TranslatorConfig {
+            engine: TranslatorEngine::Clear,
+            target_lang: Language::English,
+            model: None,
+            api_url: None,
+            api_key: String::from(""),
+            extra_params: HashMap::new(),
+        };
+
+        let translator = create(config);
+        assert_eq!(translator.name(), TranslatorEngine::Clear);
     }
 }
