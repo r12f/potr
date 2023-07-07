@@ -8,6 +8,7 @@ pub struct Opts {
     #[clap(short, long)]
     pub po_file: String,
 
+    /// Target languange. Please use the short code defined in ISO-639-1.
     #[clap(short, long, default_value = "en")]
     pub target_lang: Language,
 
@@ -22,6 +23,10 @@ pub struct Opts {
 
     #[clap(short, long = "output")]
     pub output_file: Option<String>,
+
+    /// Skip translation, only generate po file.
+    #[clap(long)]
+    pub no_translation: bool,
 }
 
 impl Opts {

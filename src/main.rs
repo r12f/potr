@@ -13,6 +13,11 @@ async fn main() -> Result<()> {
 
     let opts = Opts::parse();
     let translator_config = opts.to_translator_config();
-    let potr = Potr::new(opts.po_file, opts.output_file, translator_config);
+    let potr = Potr::new(
+        opts.po_file,
+        opts.output_file,
+        opts.no_translation,
+        translator_config,
+    );
     potr.run().await
 }
