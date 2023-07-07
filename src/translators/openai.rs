@@ -53,7 +53,7 @@ impl Translator for OpenAITranslator {
                 },
                 ChatCompletionMessage {
                     role: MessageRole::user,
-                    content: Some("The text is: ".to_string() + text),
+                    content: Some(text.to_string()),
                     name: None,
                     function_call: None,
                 },

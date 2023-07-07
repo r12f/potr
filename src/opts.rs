@@ -20,8 +20,8 @@ pub struct Opts {
     #[clap(short, long, env = "POTR_MODEL")]
     pub model: Option<String>,
 
-    #[clap(short, long = "output", default_value = ".")]
-    pub output_dir: String,
+    #[clap(short, long = "output")]
+    pub output_file: Option<String>,
 }
 
 impl Opts {
