@@ -1,12 +1,12 @@
 use clap::Parser;
 
-use crate::translators::*;
+use crate::{potr::PotrConfig, translators::*};
 
 #[derive(Debug, Parser)]
 #[clap(name = "potr", author = "r12f", about = "https://github.com/r12f/potr")]
 pub struct Opts {
-    #[clap(short, long)]
-    pub po_file: String,
+    #[clap(short, long = "po")]
+    pub po_file_path: String,
 
     /// Target languange. Please use the short code defined in ISO-639-1.
     #[clap(short, long, default_value = "en")]
@@ -22,11 +22,11 @@ pub struct Opts {
     pub model: Option<String>,
 
     #[clap(short, long = "output")]
-    pub output_file: Option<String>,
+    pub output_file_path: Option<String>,
 
     /// Skip translation, only generate po file.
     #[clap(long)]
-    pub no_translation: bool,
+    pub skip_translation: bool,
 }
 
 impl Opts {
@@ -38,6 +38,19 @@ impl Opts {
             api_url: None,
             api_key: self.api_key.clone(),
             extra_params: Default::default(),
+        }
+    }
+
+    pub fn to_potr_config(&self) -> PotrConfig {
+        let output_file_path = match &self.output_file_path {
+            Some(path) => path.clone(),
+            None => self.po_file_path.clone(),
+        };
+
+        PotrConfig {
+            po_file_path: self.po_file_path.clone(),
+            output_file_path: output_file_path,
+            skip_translation: self.skip_translation,
         }
     }
 }
