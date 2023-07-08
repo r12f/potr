@@ -109,6 +109,9 @@ msgmerge --update po/en.po po/messages.pot
 
 # Step 2: Translate PO files using potr (using OpenAI for example)
 potr -p po/en.po -e openai -t en -k <openai-api-key>
+
+# Step 3: Reformat translated PO files
+msgmerge --update po/en.po po/messages.pot
 ```
 
 ## Dev related
