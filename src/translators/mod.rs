@@ -1,5 +1,6 @@
 mod clear;
 mod clone;
+mod deepl;
 mod openai;
 
 use anyhow::Result;
@@ -396,6 +397,8 @@ pub enum TranslatorEngine {
     Clone,
     #[strum(serialize = "openai")]
     OpenAI,
+    #[strum(serialize = "deepl")]
+    DeepL,
 }
 
 #[derive(Debug, Clone)]
@@ -420,6 +423,7 @@ pub fn create(config: TranslatorConfig) -> Result<Box<dyn Translator>> {
         TranslatorEngine::Clear => Box::new(clear::ClearTranslator::new(config)),
         TranslatorEngine::Clone => Box::new(clone::CloneTranslator::new(config)),
         TranslatorEngine::OpenAI => Box::new(openai::OpenAITranslator::new(config)),
+        TranslatorEngine::DeepL => Box::new(deepl::DeeplTranslator::new(config)?),
     };
 
     Ok(translator)
@@ -470,6 +474,7 @@ mod tests {
             TranslatorEngine::Clear,
             TranslatorEngine::Clone,
             TranslatorEngine::OpenAI,
+            TranslatorEngine::DeepL,
         ];
         for engine in engines {
             config.engine = engine;

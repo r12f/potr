@@ -10,6 +10,7 @@ anyhow = "1"
 async-trait = "0.1"
 clap = { version = "4", features = ["derive", "env"] }
 ctrlc = "3.4.0"
+deepl = "0.4"
 env_logger = "0.10.0"
 openai-api-rs = "0.1"
 polib = "0.2"

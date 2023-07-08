@@ -81,7 +81,7 @@ mod tests {
             target_lang: Language::English,
             model: None,
             api_url: None,
-            api_key: std::env::var("POTR_API_KEY").unwrap(),
+            api_key: std::env::var("POTR_TEST_API_KEY_OPENAI").unwrap(),
             extra_params: HashMap::new(),
         };
         let translator = OpenAITranslator::new(config);
