@@ -12,6 +12,7 @@ use std::{
     },
 };
 
+#[derive(Debug)]
 pub struct PotrConfig {
     pub po_file_path: String,
     pub output_file_path: String,
@@ -44,10 +45,7 @@ impl Potr {
     pub async fn run(&self) -> Result<()> {
         let mut po_file = self.load_po_catelog()?;
         self.translate(&mut po_file).await?;
-
-        tracing::info!("Write to output: {:?}", self.config.output_file_path,);
-        polib::po_file::write(&po_file, &Path::new(&self.config.output_file_path))?;
-
+        self.write_output_file(po_file)?;
         Ok(())
     }
 
@@ -58,7 +56,7 @@ impl Potr {
     }
 
     async fn translate(&self, po_file: &mut Catalog) -> Result<()> {
-        let translator = translators::create(self.translator_config.clone());
+        let translator = translators::create(self.translator_config.clone())?;
         if self.config.skip_translation {
             tracing::info!(
                 "Traslation skipped: TotalMessageCount = {}",
@@ -133,5 +131,11 @@ impl Potr {
         message.set_msgstr(translated)?;
 
         return Ok(true);
+    }
+
+    fn write_output_file(&self, po_file: Catalog) -> Result<(), anyhow::Error> {
+        tracing::info!("Write to output: {:?}", self.config.output_file_path,);
+        polib::po_file::write(&po_file, &Path::new(&self.config.output_file_path))?;
+        Ok(())
     }
 }

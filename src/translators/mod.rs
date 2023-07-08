@@ -390,8 +390,11 @@ impl fmt::Display for Language {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, EnumString)]
 pub enum TranslatorEngine {
+    #[strum(serialize = "clear")]
     Clear,
+    #[strum(serialize = "clone")]
     Clone,
+    #[strum(serialize = "openai")]
     OpenAI,
 }
 
@@ -412,12 +415,14 @@ pub trait Translator: Send + Sync {
     async fn translate(&self, text: &str) -> Result<String>;
 }
 
-pub fn create(config: TranslatorConfig) -> Box<dyn Translator> {
-    match config.engine {
+pub fn create(config: TranslatorConfig) -> Result<Box<dyn Translator>> {
+    let translator: Box<dyn Translator> = match config.engine {
         TranslatorEngine::Clear => Box::new(clear::ClearTranslator::new(config)),
         TranslatorEngine::Clone => Box::new(clone::CloneTranslator::new(config)),
         TranslatorEngine::OpenAI => Box::new(openai::OpenAITranslator::new(config)),
-    }
+    };
+
+    Ok(translator)
 }
 
 #[cfg(test)]
@@ -468,7 +473,7 @@ mod tests {
         ];
         for engine in engines {
             config.engine = engine;
-            let translator = create(config.clone());
+            let translator = create(config.clone()).unwrap();
             assert_eq!(translator.name(), engine);
         }
     }

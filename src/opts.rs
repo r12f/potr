@@ -12,7 +12,7 @@ pub struct Opts {
     #[clap(short, long, default_value = "en")]
     pub target_lang: Language,
 
-    #[clap(short, long, env = "POTR_ENGINE", default_value = "OpenAI")]
+    #[clap(short, long, env = "POTR_ENGINE", default_value = "openai")]
     pub engine: TranslatorEngine,
 
     #[clap(short, long, env = "POTR_API_KEY", default_value = "")]
@@ -43,6 +43,10 @@ pub struct Opts {
     /// Limit the number of messages to translate.
     #[clap(short, long, default_value = "0")]
     pub limit: i32,
+
+    /// Print verbose logs.
+    #[clap(short, long)]
+    pub verbose: bool,
 }
 
 impl Opts {
