@@ -15,8 +15,20 @@ pub struct Opts {
     #[clap(short, long, env = "POTR_ENGINE", default_value = "openai")]
     pub engine: TranslatorEngine,
 
-    #[clap(short, long, env = "POTR_API_KEY", default_value = "")]
+    #[clap(short = 'k', long, env = "POTR_API_KEY", default_value = "")]
     pub api_key: String,
+
+    // API base. Used by Azure OpenAI, e.g. "https://your-resource-name.openai.azure.com".
+    #[clap(long, env = "POTR_API_BASE")]
+    pub api_base: Option<String>,
+
+    // API version. Used by Azure OpenAI, e.g. "2023-03-15-preview".
+    #[clap(long, env = "POTR_API_VERSION")]
+    pub api_version: Option<String>,
+
+    // API deployment id. Used by Azure OpenAI.
+    #[clap(long, env = "POTR_API_DEPLOYMENT_ID")]
+    pub api_deployment_id: Option<String>,
 
     #[clap(short, long, env = "POTR_MODEL")]
     pub model: Option<String>,
@@ -55,8 +67,10 @@ impl Opts {
             engine: self.engine.clone(),
             target_lang: self.target_lang,
             model: self.model.clone(),
-            api_url: None,
+            api_base: self.api_base.clone(),
             api_key: self.api_key.clone(),
+            api_version: self.api_version.clone(),
+            api_deployment_id: self.api_deployment_id.clone(),
             extra_params: Default::default(),
         }
     }

@@ -397,17 +397,36 @@ pub enum TranslatorEngine {
     Clone,
     #[strum(serialize = "openai")]
     OpenAI,
+    #[strum(serialize = "azure-openai")]
+    AzureOpenAI,
     #[strum(serialize = "deepl")]
     DeepL,
 }
 
 #[derive(Debug, Clone)]
 pub struct TranslatorConfig {
+    /// Translator engine. E.g. OpenAI, DeepL, etc.
     pub engine: TranslatorEngine,
+
+    /// Target language.
     pub target_lang: Language,
+
+    /// API key.
     pub api_key: String,
+
+    /// Model name. E.g. "gpt-3.5-turbo"
     pub model: Option<String>,
-    pub api_url: Option<String>,
+
+    /// API base URL. E.g. "https://your-resource-name.openai.azure.com"
+    pub api_base: Option<String>,
+
+    /// API version. E.g. "2023-03-15-preview"
+    pub api_version: Option<String>,
+
+    /// API deployment id.
+    pub api_deployment_id: Option<String>,
+
+    /// Extra parameters for each engine.
     pub extra_params: HashMap<String, String>,
 }
 
@@ -423,6 +442,7 @@ pub fn create(config: TranslatorConfig) -> Result<Box<dyn Translator>> {
         TranslatorEngine::Clear => Box::new(clear::ClearTranslator::new(config)),
         TranslatorEngine::Clone => Box::new(clone::CloneTranslator::new(config)),
         TranslatorEngine::OpenAI => Box::new(openai::OpenAITranslator::new(config)),
+        TranslatorEngine::AzureOpenAI => Box::new(openai::AzureOpenAITranslator::new(config)?),
         TranslatorEngine::DeepL => Box::new(deepl::DeeplTranslator::new(config)?),
     };
 
@@ -464,9 +484,11 @@ mod tests {
         let mut config = TranslatorConfig {
             engine: TranslatorEngine::OpenAI,
             target_lang: Language::English,
-            model: None,
-            api_url: None,
             api_key: String::from(""),
+            model: None,
+            api_base: Some("https://your-resource-name.openai.azure.com".to_string()),
+            api_version: None,
+            api_deployment_id: Some("mock-deployment".to_string()),
             extra_params: HashMap::new(),
         };
 
@@ -474,6 +496,7 @@ mod tests {
             TranslatorEngine::Clear,
             TranslatorEngine::Clone,
             TranslatorEngine::OpenAI,
+            TranslatorEngine::AzureOpenAI,
             TranslatorEngine::DeepL,
         ];
         for engine in engines {

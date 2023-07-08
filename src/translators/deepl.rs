@@ -82,9 +82,11 @@ mod tests {
         let config = TranslatorConfig {
             engine: TranslatorEngine::DeepL,
             target_lang: Language::English,
-            model: None,
-            api_url: None,
             api_key: std::env::var("POTR_TEST_API_KEY_DEEPL").unwrap(),
+            model: None,
+            api_base: None,
+            api_version: None,
+            api_deployment_id: None,
             extra_params: HashMap::new(),
         };
         let translator = DeeplTranslator::new(config).unwrap();
