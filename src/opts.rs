@@ -35,6 +35,10 @@ pub struct Opts {
     /// Translate code blocks. By default, code blocks are skipped.
     #[clap(long, visible_alias = "tc")]
     pub translate_code_blocks: bool,
+
+    /// Limit the number of messages to translate.
+    #[clap(short, long)]
+    pub limit: i32,
 }
 
 impl Opts {
@@ -61,6 +65,7 @@ impl Opts {
             skip_translation: self.skip_translation,
             translate_translated: self.translate_translated,
             translate_code_blocks: self.translate_code_blocks,
+            message_limit: self.limit,
         }
     }
 }

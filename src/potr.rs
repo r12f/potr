@@ -12,6 +12,7 @@ pub struct PotrConfig {
     pub skip_translation: bool,
     pub translate_translated: bool,
     pub translate_code_blocks: bool,
+    pub message_limit: i32,
 }
 
 pub struct Potr {
@@ -72,6 +73,11 @@ impl Potr {
                     processed_count,
                     translated_count
                 );
+            }
+
+            if translated_count >= self.config.message_limit {
+                tracing::info!("Message limit reached: {}", translated_count);
+                break;
             }
         }
 
