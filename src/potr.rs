@@ -4,7 +4,13 @@ use polib::{
     catalog::{Catalog, MessageMutProxy},
     message::{MessageMutView, MessageView},
 };
-use std::path::Path;
+use std::{
+    path::Path,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+};
 
 pub struct PotrConfig {
     pub po_file_path: String,
@@ -18,6 +24,7 @@ pub struct PotrConfig {
 pub struct Potr {
     pub config: PotrConfig,
     pub translator_config: TranslatorConfig,
+    pub is_canceled: Arc<AtomicBool>,
 }
 
 impl Potr {
@@ -25,7 +32,12 @@ impl Potr {
         Potr {
             config,
             translator_config,
+            is_canceled: Arc::new(AtomicBool::new(false)),
         }
+    }
+
+    pub fn cancel_flag(&self) -> Arc<AtomicBool> {
+        self.is_canceled.clone()
     }
 
     pub async fn run(&self) -> Result<()> {
@@ -62,6 +74,10 @@ impl Potr {
         let mut processed_count = 0;
         let mut translated_count = 0;
         for mut message in po_file.messages_mut() {
+            if self.is_canceled.load(Ordering::SeqCst) {
+                break;
+            }
+
             if self.translate_message(&translator, &mut message).await? {
                 translated_count += 1;
             }
@@ -75,7 +91,7 @@ impl Potr {
                 );
             }
 
-            if translated_count >= self.config.message_limit {
+            if self.config.message_limit > 0 && translated_count >= self.config.message_limit {
                 tracing::info!("Message limit reached: {}", translated_count);
                 break;
             }

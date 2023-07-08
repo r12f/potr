@@ -37,7 +37,7 @@ pub struct Opts {
     pub translate_code_blocks: bool,
 
     /// Limit the number of messages to translate.
-    #[clap(short, long)]
+    #[clap(short, long, default_value = "0")]
     pub limit: i32,
 }
 

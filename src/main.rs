@@ -6,6 +6,7 @@ use anyhow::Result;
 use clap::Parser;
 use opts::*;
 use potr::*;
+use std::sync::atomic;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -15,5 +16,13 @@ async fn main() -> Result<()> {
     let config = opts.to_potr_config();
     let translator_config = opts.to_translator_config();
     let potr = Potr::new(config, translator_config);
+
+    let cancel_flag = potr.cancel_flag();
+    ctrlc::set_handler(move || {
+        tracing::info!("Ctrl-C received, canceling...");
+        cancel_flag.store(true, atomic::Ordering::SeqCst);
+    })
+    .expect("Error setting Ctrl-C handler");
+
     potr.run().await
 }
