@@ -16,7 +16,7 @@ pub struct Opts {
     #[clap(short, long, env = "POTR_ENGINE", default_value = "openai")]
     pub engine: TranslatorEngine,
 
-    #[clap(short = 'k', long, default_value = "")]
+    #[clap(short = 'k', long)]
     pub api_key: Option<String>,
 
     // API base. Used by Azure OpenAI, e.g. "https://your-resource-name.openai.azure.com".
