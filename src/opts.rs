@@ -28,13 +28,17 @@ pub struct Opts {
     #[clap(long, visible_alias = "st")]
     pub skip_translation: bool,
 
-    /// Translate translated message. By default, translated messages are skipped.
-    #[clap(long, visible_alias = "tt")]
-    pub translate_translated: bool,
+    /// Process translated message. By default, translated messages are skipped.
+    #[clap(long, visible_alias = "pt")]
+    pub process_translated: bool,
 
-    /// Translate code blocks. By default, code blocks are skipped.
-    #[clap(long, visible_alias = "tc")]
-    pub translate_code_blocks: bool,
+    /// Skip regular text messages. By default, text messages are translated.
+    #[clap(long)]
+    pub skip_text: bool,
+
+    /// Process code blocks (starts with ```). By default, code blocks are skipped.
+    #[clap(long, visible_alias = "pc")]
+    pub process_code_blocks: bool,
 
     /// Limit the number of messages to translate.
     #[clap(short, long, default_value = "0")]
@@ -63,8 +67,9 @@ impl Opts {
             po_file_path: self.po_file_path.clone(),
             output_file_path: output_file_path,
             skip_translation: self.skip_translation,
-            translate_translated: self.translate_translated,
-            translate_code_blocks: self.translate_code_blocks,
+            skip_translated: !self.process_translated,
+            skip_code_blocks: !self.process_code_blocks,
+            skip_text: self.skip_text,
             message_limit: self.limit,
         }
     }

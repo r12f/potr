@@ -16,8 +16,9 @@ pub struct PotrConfig {
     pub po_file_path: String,
     pub output_file_path: String,
     pub skip_translation: bool,
-    pub translate_translated: bool,
-    pub translate_code_blocks: bool,
+    pub skip_translated: bool,
+    pub skip_code_blocks: bool,
+    pub skip_text: bool,
     pub message_limit: i32,
 }
 
@@ -98,7 +99,8 @@ impl Potr {
         }
 
         tracing::info!(
-            "Translation completed! TotalTranslated = {}",
+            "Translation completed! Processed = {}, TotalTranslated = {}",
+            processed_count,
             translated_count
         );
 
@@ -110,13 +112,18 @@ impl Potr {
         translator: &Box<dyn Translator>,
         message: &mut MessageMutProxy<'a>,
     ) -> Result<bool> {
-        if !self.config.translate_translated && message.is_translated() {
+        if self.config.skip_translated && message.is_translated() {
             tracing::debug!("Skip translated message: {}", message.msgid());
             return Ok(false);
         }
 
-        if !self.config.translate_code_blocks && message.msgid().starts_with("```") {
-            tracing::debug!("Skip code block message: {}", message.msgid());
+        if message.msgid().starts_with("```") {
+            if self.config.skip_code_blocks {
+                tracing::debug!("Skip code block message: {}", message.msgid());
+                return Ok(false);
+            }
+        } else if self.config.skip_text {
+            tracing::debug!("Skip regular text message: {}", message.msgid());
             return Ok(false);
         }
 
