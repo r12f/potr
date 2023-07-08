@@ -5,7 +5,7 @@ authors = ["r12f <r12f.code@gmail.com>"]
 edition = "2021"
 description = "Command line tool for translating GNU gettext files."
 license = "Apache-2.0"
-keywords = ["translator", "openai", "deepl"]
+keywords = ["translator", "gettext", "openai", "deepl"]
 categories = ["command-line-utilities"]
 repository = "https://github.com/r12f/potr"
 
