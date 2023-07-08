@@ -82,7 +82,7 @@ mod tests {
         let config = TranslatorConfig {
             engine: TranslatorEngine::DeepL,
             target_lang: Language::English,
-            api_key: std::env::var("POTR_TEST_API_KEY_DEEPL").unwrap(),
+            api_key: std::env::var("POTR_API_KEY_DEEPL").unwrap(),
             model: None,
             api_base: None,
             api_version: None,

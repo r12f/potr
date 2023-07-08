@@ -153,20 +153,19 @@ mod tests {
 
     #[tokio::test]
     async fn test_azure_openai_translator() {
-        if std::env::var("POTR_TEST_API_KEY_AZURE_OPENAI").is_err() {
+        // Still waiting in the waitlist ...
+        if std::env::var("POTR_API_KEY_AZURE_OPENAI").is_err() {
             return;
         }
 
         let config = TranslatorConfig {
             engine: TranslatorEngine::OpenAI,
             target_lang: Language::English,
-            api_key: std::env::var("POTR_TEST_API_KEY_AZURE_OPENAI").unwrap(),
+            api_key: std::env::var("POTR_API_KEY_AZURE_OPENAI").unwrap(),
             model: None,
-            api_base: Some(std::env::var("POTR_TEST_API_BASE_AZURE_OPENAI").unwrap()),
-            api_version: Some(std::env::var("POTR_TEST_API_VERSION_AZURE_OPENAI").unwrap()),
-            api_deployment_id: Some(
-                std::env::var("POTR_TEST_API_DEPLOYMENT_ID_AZURE_OPENAI").unwrap(),
-            ),
+            api_base: Some(std::env::var("POTR_API_BASE_AZURE_OPENAI").unwrap()),
+            api_version: None,
+            api_deployment_id: Some(std::env::var("POTR_API_DEPLOYMENT_ID_AZURE_OPENAI").unwrap()),
             extra_params: HashMap::new(),
         };
         let translator = OpenAITranslator::new(config);

@@ -33,7 +33,7 @@ mod tests {
         let config = TranslatorConfig {
             engine: TranslatorEngine::Clear,
             target_lang: Language::English,
-            api_key: std::env::var("POTR_API_KEY").unwrap(),
+            api_key: "".to_string(),
             model: None,
             api_base: None,
             api_version: None,

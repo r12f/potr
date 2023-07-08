@@ -1,3 +1,4 @@
+use anyhow::Result;
 use clap::Parser;
 
 use crate::{potr::PotrConfig, translators::*};
@@ -15,19 +16,19 @@ pub struct Opts {
     #[clap(short, long, env = "POTR_ENGINE", default_value = "openai")]
     pub engine: TranslatorEngine,
 
-    #[clap(short = 'k', long, env = "POTR_API_KEY", default_value = "")]
-    pub api_key: String,
+    #[clap(short = 'k', long, default_value = "")]
+    pub api_key: Option<String>,
 
     // API base. Used by Azure OpenAI, e.g. "https://your-resource-name.openai.azure.com".
-    #[clap(long, env = "POTR_API_BASE")]
+    #[clap(long, env = "POTR_API_BASE_AZURE_OPENAI")]
     pub api_base: Option<String>,
 
     // API version. Used by Azure OpenAI, e.g. "2023-03-15-preview".
-    #[clap(long, env = "POTR_API_VERSION")]
+    #[clap(long, env = "POTR_API_VERSION_AZURE_OPENAI")]
     pub api_version: Option<String>,
 
     // API deployment id. Used by Azure OpenAI.
-    #[clap(long, env = "POTR_API_DEPLOYMENT_ID")]
+    #[clap(long, env = "POTR_API_DEPLOYMENT_ID_AZURE_OPENAI")]
     pub api_deployment_id: Option<String>,
 
     #[clap(short, long, env = "POTR_MODEL")]
@@ -62,17 +63,50 @@ pub struct Opts {
 }
 
 impl Opts {
-    pub fn to_translator_config(&self) -> TranslatorConfig {
-        TranslatorConfig {
+    pub fn to_translator_config(&self) -> Result<TranslatorConfig> {
+        let api_key = match &self.api_key {
+            Some(key) => key.clone(),
+            None => match self.engine {
+                TranslatorEngine::OpenAI => match std::env::var("POTR_API_KEY_OPENAI") {
+                    Ok(key) => key,
+                    Err(_) => {
+                        anyhow::bail!(
+                            "OpenAI API key is not specified, please specify it via \"-k\" option or POTR_API_KEY_OPENAI environment variable."
+                        );
+                    }
+                },
+                TranslatorEngine::AzureOpenAI => match std::env::var("POTR_API_KEY_AZURE_OPENAI") {
+                    Ok(key) => key,
+                    Err(_) => {
+                        anyhow::bail!(
+                            "Azure OpenAI service API key is not specified, please specify it via \"-k\" option or POTR_API_KEY_AZURE_OPENAI environment variable."
+                        );
+                    }
+                },
+                TranslatorEngine::DeepL => match std::env::var("POTR_API_KEY_DEEPL") {
+                    Ok(key) => key,
+                    Err(_) => {
+                        anyhow::bail!(
+                            "DeepL API key is not specified, please specify it via \"-k\" option or POTR_API_KEY_DEEPL environment variable."
+                        );
+                    }
+                },
+                _ => "".to_string(),
+            },
+        };
+
+        let config = TranslatorConfig {
             engine: self.engine.clone(),
             target_lang: self.target_lang,
             model: self.model.clone(),
             api_base: self.api_base.clone(),
-            api_key: self.api_key.clone(),
+            api_key,
             api_version: self.api_version.clone(),
             api_deployment_id: self.api_deployment_id.clone(),
             extra_params: Default::default(),
-        }
+        };
+
+        Ok(config)
     }
 
     pub fn to_potr_config(&self) -> PotrConfig {

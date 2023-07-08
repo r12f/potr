@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     tracing::debug!("Opts: {:?}", opts);
 
     let config = opts.to_potr_config();
-    let translator_config = opts.to_translator_config();
+    let translator_config = opts.to_translator_config()?;
     tracing::debug!(
         "Config loaded: PotrConfig = {:?}, TranslatorConfig = {:?}",
         config,

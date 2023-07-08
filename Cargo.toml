@@ -1,7 +1,13 @@
 [package]
 name = "potr"
 version = "0.1.0"
+authors = ["r12f <r12f.code@gmail.com>"]
 edition = "2021"
+description = "Command line tool for translating GNU gettext files."
+license = "Apache-2.0"
+keywords = ["translator", "openai", "deepl"]
+categories = ["command-line-utilities"]
+repository = "https://github.com/r12f/potr"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -21,3 +27,12 @@ tracing = { version = "0.1", features = ["log"] }
 
 [dev-dependencies]
 pretty_assertions = "1.3.0"
+
+[profile.dev]
+panic = "abort"             # Abort on panic to make it more friendly for debugger
+
+[profile.release]
+opt-level = 'z'             # Optimize for size.
+lto = true                  # Enable link time optimization
+codegen-units = 1           # Using 1 codegen units to help getting more optimization on binary size.
+panic = 'abort'             # Avoid generating stack unwind code.
