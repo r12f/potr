@@ -1,27 +1,29 @@
 use super::{Language, Translator, TranslatorConfig, TranslatorEngine};
 use anyhow::Result;
-use async_trait::async_trait;
-use openai_api_rs::v1::api::Client;
-use openai_api_rs::v1::chat_completion::{
-    ChatCompletionMessage, ChatCompletionRequest, MessageRole,
+use async_openai::{
+    config::OpenAIConfig,
+    types::{ChatCompletionRequestMessageArgs, CreateChatCompletionRequestArgs, Role},
+    Client,
 };
+use async_trait::async_trait;
 
 pub struct OpenAITranslator {
     model: String,
     target_lang: Language,
-    client: Client,
+    client: Client<OpenAIConfig>,
 }
 
 impl OpenAITranslator {
     pub fn new(config: TranslatorConfig) -> OpenAITranslator {
-        let client = Client::new(config.api_key.clone());
+        let openai_config = OpenAIConfig::new().with_api_key(config.api_key.clone());
+        let client = Client::with_config(openai_config);
 
         OpenAITranslator {
             model: if let Some(model) = config.model {
                 model
             } else {
                 // By default, we use the GPT3.5 model for cost-saving purpose.
-                String::from(openai_api_rs::v1::chat_completion::GPT3_5_TURBO)
+                String::from("gpt-3.5-turbo")
             },
             target_lang: config.target_lang,
             client,
@@ -36,35 +38,29 @@ impl Translator for OpenAITranslator {
     }
 
     async fn translate(&self, text: &str) -> Result<String> {
-        let req = ChatCompletionRequest {
-            model: self.model.clone(),
-            messages: vec![
-                ChatCompletionMessage {
-                    role: MessageRole::system,
-                    content: Some(format!("You are a professional translator. Please translate the text into {:?} without explanation.", self.target_lang)),
-                    name: None,
-                    function_call: None,
-                },
-                ChatCompletionMessage {
-                    role: MessageRole::user,
-                    content: Some("I understand. Please give me the text.".to_string()),
-                    name: None,
-                    function_call: None,
-                },
-                ChatCompletionMessage {
-                    role: MessageRole::user,
-                    content: Some(text.to_string()),
-                    name: None,
-                    function_call: None,
-                },
-            ],
-            functions: None,
-            function_call: None,
-        };
+        let req = CreateChatCompletionRequestArgs::default()
+            .model(self.model.clone())
+            .messages([
+                ChatCompletionRequestMessageArgs::default()
+                    .role(Role::System)
+                    .content(format!("You are a professional translator. Please translate the text into {:?} without explanation.", self.target_lang))
+                    .build()?,
+                ChatCompletionRequestMessageArgs::default()
+                    .role(Role::User)
+                    .content("I understand. Please give me the text.".to_string())
+                    .build()?,
+                ChatCompletionRequestMessageArgs::default()
+                    .role(Role::User)
+                    .content(text.to_string())
+                    .build()?,
+            ]).build()?;
 
-        let response = self.client.chat_completion(req).await?;
-        let result = &response.choices[0].message;
-        Ok(result.content.clone().unwrap_or_default())
+        let response = self.client.chat().create(req).await?;
+        let result = match &response.choices[0].message.content {
+            Some(content) => content.clone(),
+            None => String::from(""),
+        };
+        Ok(result)
     }
 }
 

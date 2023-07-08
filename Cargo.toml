@@ -7,12 +7,12 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
+async-openai = "0.12"
 async-trait = "0.1"
 clap = { version = "4", features = ["derive", "env"] }
 ctrlc = "3.4.0"
 deepl = "0.4"
 env_logger = "0.10.0"
-openai-api-rs = "0.1"
 polib = "0.2"
 strum = "0.25"
 strum_macros = "0.25"
