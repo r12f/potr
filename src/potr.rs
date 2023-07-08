@@ -72,21 +72,36 @@ impl Potr {
 
         let mut processed_count = 0;
         let mut translated_count = 0;
+        let mut failed_count = 0;
         for mut message in po_file.messages_mut() {
             if self.is_canceled.load(Ordering::SeqCst) {
                 break;
             }
 
-            if self.translate_message(&translator, &mut message).await? {
-                translated_count += 1;
+            match self.translate_message(&translator, &mut message).await {
+                Ok(translated) => {
+                    if translated {
+                        translated_count += 1;
+                    }
+                }
+                Err(e) => {
+                    failed_count += 1;
+
+                    tracing::error!(
+                        "Failed to translate message: Error = {}, Message = {}",
+                        e,
+                        message.msgid()
+                    );
+                }
             }
 
             processed_count += 1;
             if processed_count % 10 == 0 {
                 tracing::info!(
-                    "Processed {} messages, translated {}.",
+                    "Processed {} messages, translated {}, failed {}.",
                     processed_count,
-                    translated_count
+                    translated_count,
+                    failed_count
                 );
             }
 
@@ -97,9 +112,10 @@ impl Potr {
         }
 
         tracing::info!(
-            "Translation completed! Processed = {}, TotalTranslated = {}",
+            "Translation completed! Processed = {}, TotalTranslated = {}, TotalFailed = {}",
             processed_count,
-            translated_count
+            translated_count,
+            failed_count
         );
 
         Ok(())
