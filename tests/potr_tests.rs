@@ -41,6 +41,23 @@ async fn potr_should_translate_messages_from_filtered_source_file() {
     run_potr_test("source-filter", potr_config).await;
 }
 
+#[tokio::test]
+async fn potr_should_translate_code_block_messages() {
+    let mut potr_config = PotrConfig::default();
+    potr_config.skip_code_blocks = false;
+
+    run_potr_test("code-block", potr_config).await;
+}
+
+#[tokio::test]
+async fn potr_should_translate_code_block_messages_with_include_regex() {
+    let mut potr_config = PotrConfig::default();
+    potr_config.skip_code_blocks = false;
+    potr_config.include_message_regex = Some(Regex::new("```bash").unwrap());
+
+    run_potr_test("code-block-with-include-regex", potr_config).await;
+}
+
 async fn run_potr_test(test_name: &str, mut potr_config: PotrConfig) {
     potr_config.po_file_path = format!("tests/data/{}-input.po", test_name);
     potr_config.output_file_path = format!("tests/data/{}-result.po", test_name);

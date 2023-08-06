@@ -22,4 +22,7 @@ msgid ""
 "# This is a code block\n"
 "```"
 msgstr ""
+"```bash\n"
+"# This is a code block\n"
+"```"
 
