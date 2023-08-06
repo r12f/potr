@@ -1,6 +1,4 @@
 mod opts;
-mod potr;
-mod translators;
 
 use anyhow::Result;
 use clap::Parser;

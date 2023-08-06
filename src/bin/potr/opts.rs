@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
-
-use crate::{potr::PotrConfig, translators::*};
+use potr::*;
+use regex::Regex;
 
 #[derive(Debug, Parser)]
 #[clap(name = "potr", author = "r12f", about = "https://github.com/r12f/potr")]
@@ -56,6 +56,10 @@ pub struct Opts {
     /// Limit the number of messages to translate.
     #[clap(short, long, default_value = "0")]
     pub limit: i32,
+
+    /// Source file path regex to translate. By default, all files are translated.
+    #[clap(long)]
+    pub source: Option<String>,
 
     /// Print verbose logs.
     #[clap(short, long)]
@@ -122,6 +126,10 @@ impl Opts {
             skip_translated: !self.process_translated,
             skip_code_blocks: !self.process_code_blocks,
             skip_text: self.skip_text,
+            source_regex: match &self.source {
+                Some(s) => Some(Regex::new(s).unwrap()),
+                None => None,
+            },
             message_limit: self.limit,
         }
     }

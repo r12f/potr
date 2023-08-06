@@ -135,7 +135,7 @@ mod tests {
         let config = TranslatorConfig {
             engine: TranslatorEngine::OpenAI,
             target_lang: Language::English,
-            api_key: std::env::var("POTR_TEST_API_KEY_OPENAI").unwrap(),
+            api_key: std::env::var("POTR_API_KEY_OPENAI").unwrap(),
             model: None,
             api_base: None,
             api_version: None,

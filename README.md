@@ -44,7 +44,8 @@ By default, potr will skip certain messages, such as translated messages and cod
 - `--pc` or `--process-code-blocks`: Process code blocks
 - `--skip-text`: Skip normal text messages (non-code-blocks)
 - `--st` or `--skip-translation`: Skip translation for all messages. This is useful when we only want to update the PO file with the current message to see format changes, etc.
-- `-l` or `--limit``: Limit the number of messages to translate. This is useful for testing purpose.
+- `--source`: Specify the source file regex for only translating messages from a specific source file.
+- `-l` or `--limit`: Limit the number of messages to translate. This is useful for testing purpose.
 
 ```bash
 # Translate en.po to English using OpenAI, process translated messages, skip code blocks, and limit to 3 messages

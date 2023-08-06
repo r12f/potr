@@ -430,6 +430,21 @@ pub struct TranslatorConfig {
     pub extra_params: HashMap<String, String>,
 }
 
+impl Default for TranslatorConfig {
+    fn default() -> Self {
+        Self {
+            engine: TranslatorEngine::Clone,
+            target_lang: Language::English,
+            api_key: "".to_string(),
+            model: None,
+            api_base: None,
+            api_version: None,
+            api_deployment_id: None,
+            extra_params: Default::default(),
+        }
+    }
+}
+
 #[async_trait]
 pub trait Translator: Send + Sync {
     fn name(&self) -> TranslatorEngine;

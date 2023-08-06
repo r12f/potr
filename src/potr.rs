@@ -4,6 +4,7 @@ use polib::{
     catalog::{Catalog, MessageMutProxy},
     message::{MessageMutView, MessageView},
 };
+use regex::Regex;
 use std::{
     path::Path,
     sync::{
@@ -12,7 +13,7 @@ use std::{
     },
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PotrConfig {
     pub po_file_path: String,
     pub output_file_path: String,
@@ -20,13 +21,31 @@ pub struct PotrConfig {
     pub skip_translated: bool,
     pub skip_code_blocks: bool,
     pub skip_text: bool,
+    pub source_regex: Option<Regex>,
     pub message_limit: i32,
+}
+
+impl Default for PotrConfig {
+    fn default() -> Self {
+        Self {
+            po_file_path: Default::default(),
+            output_file_path: Default::default(),
+            skip_translation: false,
+            skip_translated: true,
+            skip_code_blocks: true,
+            skip_text: false,
+            source_regex: None,
+            message_limit: 0,
+        }
+    }
 }
 
 pub struct Potr {
     pub config: PotrConfig,
     pub translator_config: TranslatorConfig,
     pub is_canceled: Arc<AtomicBool>,
+
+    source_parser_regex: Regex,
 }
 
 impl Potr {
@@ -35,6 +54,7 @@ impl Potr {
             config,
             translator_config,
             is_canceled: Arc::new(AtomicBool::new(false)),
+            source_parser_regex: Regex::new(r"[^:]+:\d+").unwrap(),
         }
     }
 
@@ -139,6 +159,24 @@ impl Potr {
         } else if self.config.skip_text {
             tracing::debug!("Skip regular text message: {}", message.msgid());
             return Ok(false);
+        }
+
+        if let Some(source_regex) = &self.config.source_regex {
+            let message_source_str = message.source();
+            let message_sources: Vec<&str> = self
+                .source_parser_regex
+                .find_iter(message_source_str)
+                .map(|m| m.as_str().trim())
+                .collect();
+
+            if !message_sources.iter().any(|s| source_regex.is_match(s)) {
+                tracing::debug!(
+                    "Skip message not matching source regex: {}, Source = {}",
+                    message.msgid(),
+                    message_source_str
+                );
+                return Ok(false);
+            }
         }
 
         tracing::debug!("Translating message: {}", message.msgid());
