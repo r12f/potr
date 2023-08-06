@@ -1,6 +1,6 @@
 [package]
 name = "potr"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["r12f <r12f.code@gmail.com>"]
 edition = "2021"
 description = "Command line tool for translating GNU gettext files."
