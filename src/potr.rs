@@ -150,19 +150,32 @@ impl Potr {
         translator: &Box<dyn Translator>,
         message: &mut MessageMutProxy<'a>,
     ) -> Result<bool> {
+        if !self.should_translate_message(message) {
+            return Ok(false);
+        }
+
+        tracing::debug!("Translating message: {}", message.msgid());
+        let translated = translator.translate(&message.msgid()).await?;
+        tracing::debug!("Translation completed: Result = {}\n", translated);
+        message.set_msgstr(translated)?;
+
+        return Ok(true);
+    }
+
+    fn should_translate_message(&self, message: &MessageMutProxy) -> bool {
         if self.config.skip_translated && message.is_translated() {
             tracing::debug!("Skip translated message: {}", message.msgid());
-            return Ok(false);
+            return false;
         }
 
         if message.msgid().starts_with("```") {
             if self.config.skip_code_blocks {
                 tracing::debug!("Skip code block message: {}", message.msgid());
-                return Ok(false);
+                return false;
             }
         } else if self.config.skip_text {
             tracing::debug!("Skip regular text message: {}", message.msgid());
-            return Ok(false);
+            return false;
         }
 
         if let Some(source_regex) = &self.config.source_regex {
@@ -179,7 +192,7 @@ impl Potr {
                     message.msgid(),
                     message_source_str
                 );
-                return Ok(false);
+                return false;
             }
         }
 
@@ -190,7 +203,7 @@ impl Potr {
                     message.msgid(),
                     message.source()
                 );
-                return Ok(false);
+                return false;
             }
         }
 
@@ -201,16 +214,11 @@ impl Potr {
                     message.msgid(),
                     message.source()
                 );
-                return Ok(false);
+                return false;
             }
         }
 
-        tracing::debug!("Translating message: {}", message.msgid());
-        let translated = translator.translate(&message.msgid()).await?;
-        tracing::debug!("Translation completed: Result = {}\n", translated);
-        message.set_msgstr(translated)?;
-
-        return Ok(true);
+        return true;
     }
 
     fn write_output_file(&self, po_file: Catalog) -> Result<(), anyhow::Error> {
