@@ -21,3 +21,10 @@ msgid ""
 "# This is a code block\n"
 "```"
 msgstr ""
+
+#: src/Code2.md:3
+msgid ""
+"```rust\n"
+"// This is another code block\n"
+"```"
+msgstr ""
