@@ -18,6 +18,22 @@ async fn potr_should_translate_translated_messages() {
 }
 
 #[tokio::test]
+async fn potr_should_translate_included_messages() {
+    let mut potr_config = PotrConfig::default();
+    potr_config.include_message_regex = Some(Regex::new("^That is").unwrap());
+
+    run_potr_test("include-regex", potr_config).await;
+}
+
+#[tokio::test]
+async fn potr_should_not_translate_excluded_messages() {
+    let mut potr_config = PotrConfig::default();
+    potr_config.exclude_message_regex = Some(Regex::new("^That is").unwrap());
+
+    run_potr_test("exclude-regex", potr_config).await;
+}
+
+#[tokio::test]
 async fn potr_should_translate_messages_from_filtered_source_file() {
     let mut potr_config = PotrConfig::default();
     potr_config.source_regex = Some(Regex::new("Pen").unwrap());

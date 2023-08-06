@@ -61,6 +61,14 @@ pub struct Opts {
     #[clap(long)]
     pub source: Option<String>,
 
+    /// Regex to include messages to translate. By default, all messages are translated.
+    #[clap(long = "include")]
+    pub include_message: Option<String>,
+
+    /// Regex to exclude messages to translate. By default, all messages are translated.
+    #[clap(long = "include")]
+    pub exclude_message: Option<String>,
+
     /// Print verbose logs.
     #[clap(short, long)]
     pub verbose: bool,
@@ -127,6 +135,14 @@ impl Opts {
             skip_code_blocks: !self.process_code_blocks,
             skip_text: self.skip_text,
             source_regex: match &self.source {
+                Some(s) => Some(Regex::new(s).unwrap()),
+                None => None,
+            },
+            include_message_regex: match &self.include_message {
+                Some(s) => Some(Regex::new(s).unwrap()),
+                None => None,
+            },
+            exclude_message_regex: match &self.exclude_message {
                 Some(s) => Some(Regex::new(s).unwrap()),
                 None => None,
             },

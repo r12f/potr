@@ -22,6 +22,8 @@ pub struct PotrConfig {
     pub skip_code_blocks: bool,
     pub skip_text: bool,
     pub source_regex: Option<Regex>,
+    pub include_message_regex: Option<Regex>,
+    pub exclude_message_regex: Option<Regex>,
     pub message_limit: i32,
 }
 
@@ -35,6 +37,8 @@ impl Default for PotrConfig {
             skip_code_blocks: true,
             skip_text: false,
             source_regex: None,
+            include_message_regex: None,
+            exclude_message_regex: None,
             message_limit: 0,
         }
     }
@@ -174,6 +178,28 @@ impl Potr {
                     "Skip message not matching source regex: {}, Source = {}",
                     message.msgid(),
                     message_source_str
+                );
+                return Ok(false);
+            }
+        }
+
+        if let Some(include_message_regex) = &self.config.include_message_regex {
+            if !include_message_regex.is_match(message.msgid()) {
+                tracing::debug!(
+                    "Skip message not matching include regex: {}, Source = {}",
+                    message.msgid(),
+                    message.source()
+                );
+                return Ok(false);
+            }
+        }
+
+        if let Some(exclude_message_regex) = &self.config.exclude_message_regex {
+            if exclude_message_regex.is_match(message.msgid()) {
+                tracing::debug!(
+                    "Skip message matching exclude regex: {}, Source = {}",
+                    message.msgid(),
+                    message.source()
                 );
                 return Ok(false);
             }
