@@ -25,6 +25,7 @@ pub struct PotrConfig {
     pub include_message_regex: Option<Regex>,
     pub exclude_message_regex: Option<Regex>,
     pub message_limit: i32,
+    pub as_fuzzy: bool,
 }
 
 impl Default for PotrConfig {
@@ -40,6 +41,7 @@ impl Default for PotrConfig {
             include_message_regex: None,
             exclude_message_regex: None,
             message_limit: 0,
+            as_fuzzy: false,
         }
     }
 }
@@ -158,6 +160,10 @@ impl Potr {
         let translated = translator.translate(&message.msgid()).await?;
         tracing::debug!("Translation completed: Result = {}\n", translated);
         message.set_msgstr(translated)?;
+
+        if self.config.as_fuzzy {
+            message.flags_mut().add_flag("fuzzy");
+        }
 
         return Ok(true);
     }
