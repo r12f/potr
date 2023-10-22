@@ -66,6 +66,14 @@ async fn potr_should_mark_translated_message_as_fuzzy() {
     run_potr_test("fuzzy", potr_config).await;
 }
 
+#[tokio::test]
+async fn potr_should_skip_non_fuzzy_message() {
+    let mut potr_config = PotrConfig::default();
+    potr_config.skip_non_fuzzy = true;
+
+    run_potr_test("fuzzy-filter", potr_config).await;
+}
+
 async fn run_potr_test(test_name: &str, mut potr_config: PotrConfig) {
     potr_config.po_file_path = format!("tests/data/{}-input.po", test_name);
     potr_config.output_file_path = format!("tests/data/{}-result.po", test_name);

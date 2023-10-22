@@ -53,6 +53,10 @@ pub struct Opts {
     #[clap(long, visible_alias = "pc")]
     pub process_code_blocks: bool,
 
+    /// Process fuzzy messages only. By default, we process both fuzzy and non fuzzy messages.
+    #[clap(long, visible_alias = "pfo")]
+    pub process_fuzzy_only: bool,
+
     /// Limit the number of messages to translate.
     #[clap(short, long, default_value = "0")]
     pub limit: i32,
@@ -138,6 +142,7 @@ impl Opts {
             skip_translated: !self.process_translated,
             skip_code_blocks: !self.process_code_blocks,
             skip_text: self.skip_text,
+            skip_non_fuzzy: !self.process_fuzzy_only,
             source_regex: match &self.source {
                 Some(s) => Some(Regex::new(s).unwrap()),
                 None => None,
