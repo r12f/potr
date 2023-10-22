@@ -21,6 +21,7 @@ pub struct PotrConfig {
     pub skip_translated: bool,
     pub skip_code_blocks: bool,
     pub skip_text: bool,
+    pub skip_non_fuzzy: bool,
     pub source_regex: Option<Regex>,
     pub include_message_regex: Option<Regex>,
     pub exclude_message_regex: Option<Regex>,
@@ -37,6 +38,7 @@ impl Default for PotrConfig {
             skip_translated: true,
             skip_code_blocks: true,
             skip_text: false,
+            skip_non_fuzzy: false,
             source_regex: None,
             include_message_regex: None,
             exclude_message_regex: None,
@@ -163,6 +165,8 @@ impl Potr {
 
         if self.config.as_fuzzy {
             message.flags_mut().add_flag("fuzzy");
+        } else {
+            message.flags_mut().remove_flag("fuzzy");
         }
 
         return Ok(true);
@@ -171,6 +175,11 @@ impl Potr {
     fn should_translate_message(&self, message: &MessageMutProxy) -> bool {
         if self.config.skip_translated && message.is_translated() {
             tracing::debug!("Skip translated message: {}", message.msgid());
+            return false;
+        }
+
+        if self.config.skip_non_fuzzy && !message.is_fuzzy() {
+            tracing::debug!("Skip non fuzzy message: {}", message.msgid());
             return false;
         }
 
