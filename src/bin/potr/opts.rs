@@ -69,6 +69,10 @@ pub struct Opts {
     #[clap(long = "include")]
     pub exclude_message: Option<String>,
 
+    /// Mark translated messages as fuzzy.
+    #[clap(long = "fuzzy")]
+    pub as_fuzzy: bool,
+
     /// Print verbose logs.
     #[clap(short, long)]
     pub verbose: bool,
@@ -147,6 +151,7 @@ impl Opts {
                 None => None,
             },
             message_limit: self.limit,
+            as_fuzzy: self.as_fuzzy,
         }
     }
 }

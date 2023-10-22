@@ -58,6 +58,14 @@ async fn potr_should_translate_code_block_messages_with_include_regex() {
     run_potr_test("code-block-with-include-regex", potr_config).await;
 }
 
+#[tokio::test]
+async fn potr_should_mark_translated_message_as_fuzzy() {
+    let mut potr_config = PotrConfig::default();
+    potr_config.as_fuzzy = true;
+
+    run_potr_test("fuzzy", potr_config).await;
+}
+
 async fn run_potr_test(test_name: &str, mut potr_config: PotrConfig) {
     potr_config.po_file_path = format!("tests/data/{}-input.po", test_name);
     potr_config.output_file_path = format!("tests/data/{}-result.po", test_name);
