@@ -52,6 +52,14 @@ pub struct Opts {
     /// Process code blocks (starts with ```). By default, code blocks are skipped.
     #[clap(long, visible_alias = "pc")]
     pub process_code_blocks: bool,
+    
+    /// Skip $$ prefixed message(skip formula) (starts with $$). By default, $$ blocks are skipped.
+    #[clap(long, visible_alias = "sf")]
+    pub skip_formula_blocks: bool,
+
+    /// Skip image file, (starts with `![](` ). By default, image files are skipped.
+    #[clap(long, visible_alias = "si")]
+    pub skip_md_image_file: bool,
 
     /// Limit the number of messages to translate.
     #[clap(short, long, default_value = "0")]
@@ -66,7 +74,7 @@ pub struct Opts {
     pub include_message: Option<String>,
 
     /// Regex to exclude messages to translate. By default, all messages are translated.
-    #[clap(long = "include")]
+    #[clap(long = "exclude")]
     pub exclude_message: Option<String>,
 
     /// Print verbose logs.
@@ -133,6 +141,8 @@ impl Opts {
             skip_translation: self.skip_translation,
             skip_translated: !self.process_translated,
             skip_code_blocks: !self.process_code_blocks,
+            skip_formula_blocks: !self.skip_formula_blocks,
+            skip_md_image_file: !self.skip_md_image_file,
             skip_text: self.skip_text,
             source_regex: match &self.source {
                 Some(s) => Some(Regex::new(s).unwrap()),

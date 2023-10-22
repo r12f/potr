@@ -20,6 +20,8 @@ pub struct PotrConfig {
     pub skip_translation: bool,
     pub skip_translated: bool,
     pub skip_code_blocks: bool,
+    pub skip_formula_blocks: bool,
+    pub skip_md_image_file: bool,
     pub skip_text: bool,
     pub source_regex: Option<Regex>,
     pub include_message_regex: Option<Regex>,
@@ -35,6 +37,8 @@ impl Default for PotrConfig {
             skip_translation: false,
             skip_translated: true,
             skip_code_blocks: true,
+            skip_formula_blocks: true,
+            skip_md_image_file: true,
             skip_text: false,
             source_regex: None,
             include_message_regex: None,
@@ -173,7 +177,36 @@ impl Potr {
                 tracing::debug!("Skip code block message: {}", message.msgid());
                 return false;
             }
-        } else if self.config.skip_text {
+        }
+        
+        // len == 1, do not translate.
+        else if message.msgid().len() == 1 {
+            return false;
+        }
+
+        // formula block, starts_with "$$"
+        else if message.msgid().starts_with("$$") {
+            if self.config.skip_formula_blocks {
+                tracing::debug!("Skip $$ prefixed message(skip formula): {}", message.msgid());
+                return false;
+            }
+        } 
+        // image file, starts_with "![]("
+        else if message.msgid().starts_with("![](") {
+            if self.config.skip_md_image_file {
+                tracing::debug!("Skip image file, starts_with \"![](\": {}", message.msgid());
+                return false;
+            }
+        } 
+        // image file, like: msgid "![img20230414162317](img/img20230414162317.png)"
+        else if message.msgid().starts_with("![") && message.msgid().ends_with(")"){
+            if self.config.skip_md_image_file {
+                tracing::debug!("Skip image file, like ![img20230414162317](img/img20230414): {}", message.msgid());
+                return false;
+            }
+        } 
+
+        else if self.config.skip_text {
             tracing::debug!("Skip regular text message: {}", message.msgid());
             return false;
         }
